@@ -1,0 +1,49 @@
+ext.pluginClassNames = 'org.rundeck.plugins.SapWorkflowStepPlugin'
+ext.pluginName = 'SAP Workflow Step Plugin'
+ext.pluginDescription = 'Copy and release pre-defined SAP jobs'
+
+apply plugin: 'java'
+
+ext.pluginVersion = 1.2
+project.version = 1.0
+
+configurations{
+  pluginLibs
+  compile{
+    extendsFrom pluginLibs
+  }
+}
+
+repositories {
+  mavenCentral()
+  maven { url 'http://maven.mit.edu/nexus/content/repositories/public' }
+}
+
+dependencies {
+  compile(group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25')
+  compile(group: 'commons-io', name: 'commons-io', version: '2.4')
+  compile(group: 'org.rundeck', name: 'rundeck-core', version: '3.0.9-20181127')
+  compile(group: 'com.sap.conn.jco', name: 'sapjco3', version: '3.0.14')
+//  compile files("/path/to/official/sapjco3.jar")
+}
+
+task copyToLib(type: Copy) {
+  into "$buildDir/output/lib"
+  from configurations.pluginLibs
+}
+
+jar {
+  from "$buildDir/output"
+  manifest {
+    attributes 'Rundeck-Plugin-Classnames': pluginClassNames
+    attributes 'Rundeck-Plugin-Name': pluginName
+    attributes 'Rundeck-Plugin-Description': pluginDescription
+    def libList = configurations.pluginLibs.collect{'lib/'+it.name}.join(' ')
+    attributes 'Rundeck-Plugin-Libs': "${libList}"
+    attributes 'Rundeck-Plugin-Version': pluginVersion
+    attributes 'Rundeck-Plugin-Archive': 'true'
+    attributes 'Rundeck-Plugin-File-Version': project.version
+  }
+}
+
+jar.dependsOn(copyToLib)

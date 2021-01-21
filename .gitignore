@@ -1,0 +1,8 @@
+.idea/
+.gradle/
+*.jcoDestination
+out/
+*.iml
+*.trc
+build/
+**/*.sh
